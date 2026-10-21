@@ -1,67 +1,24 @@
-# Template de démonstration
+# Intégration ASEKO Pool
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
-
-## Ce que vous obtenez
-
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+Cette intégration externe lit l'état des équipements de piscine via l'API publique ACS d'ASEKO. Elle est en lecture seule : elle n'allume ni n'éteint la pompe de filtration et n'envoie aucune commande aux équipements ASEKO.
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+1. Créez une clé API dans les paramètres de votre compte ASEKO : https://account.aseko.cloud/profile/settings/api-keys.
+2. Acceptez les conditions d'utilisation ASEKO en vigueur.
+3. Installez ASEKO Pool sur Gladys Assistant 5.1.0 ou ultérieur.
+4. Saisissez la clé dans le champ Clé API ASEKO. Gladys conserve ce champ comme secret.
+5. Choisissez un intervalle d'actualisation (60 à 3600 secondes ; 300 par défaut), enregistrez puis recherchez les appareils.
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
-
-## Actions
-
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
-
-## Scènes
-
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
-
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
-
-## Tableau de bord
-
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+L'intégration découvre les unités associées à votre compte ASEKO. Elle n'ajoute que les mesures que l'API indique comme disponibles pour chaque unité. L'état de la pompe/filtration, les températures, le pH, le redox, la pression, le niveau d'eau, la chimie de l'eau, le mode de fonctionnement et les messages d'état sont accessibles si l'unité les fournit. Les valeurs absentes ou nulles ne sont pas publiées.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- 401 Unauthorized : vérifiez la clé API et sa validité.
+- 403 Forbidden : acceptez les conditions d'utilisation ASEKO ; l'accès API peut aussi dépendre de votre offre.
+- 429 Too Many Requests : augmentez l'intervalle d'actualisation et réessayez plus tard.
+- Aucun appareil ou aucune mesure : vérifiez que l'unité est associée dans ASEKO Cloud et qu'elle a transmis des données.
+
+L'intégration utilise uniquement des requêtes HTTPS GET vers https://api.aseko.cloud/api/v1. La clé API n'est jamais écrite dans les journaux.
+
+Documentation API : https://api.aseko.cloud/api/v1/docs.

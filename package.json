@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-aseko-pool",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Read-only Gladys integration for ASEKO pool telemetry.",
   "type": "module",
   "main": "index.js",
   "scripts": {

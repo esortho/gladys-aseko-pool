@@ -1,61 +1,24 @@
-# Demo Devices Template
+# ASEKO Pool integration
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+This external integration reads pool-unit status from the ASEKO Public ACS API. It is read-only: it does not turn the filtration pump on or off and does not send commands to any ASEKO equipment.
 
-## What you get
+## Setup
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+1. Create an API key from your ASEKO account settings at https://account.aseko.cloud/profile/settings/api-keys.
+2. Accept the current ASEKO terms of service.
+3. Install ASEKO Pool in Gladys Assistant 5.1.0 or later.
+4. Enter the key in the integration's ASEKO API key field. The field is stored as a Gladys secret.
+5. Set the refresh interval (60–3600 seconds; default 300), save, and scan for units.
 
-## Configuration
-
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
-
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
-
-## Actions
-
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
-
-## Scenes
-
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
-
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
-
-## Dashboard
-
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+The integration discovers the paired units in your ASEKO account. For each unit, it adds only telemetry fields the API says are available. The pump/filtration state, temperatures, pH, redox, pressure, water flow, water level, operating mode and status messages can be exposed when supported by that unit. Missing or null measurements are not published.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- 401 Unauthorized: verify the API key and that it has not expired or been deleted.
+- 403 Forbidden: accept ASEKO's current terms of service; API access may also depend on your account plan.
+- 429 Too Many Requests: increase the refresh interval and try again later.
+- No device or measurements: confirm the unit is paired in ASEKO Cloud and has reported data to ASEKO.
+
+The integration makes only HTTPS GET requests to https://api.aseko.cloud/api/v1. It never logs the API key.
+
+API documentation: https://api.aseko.cloud/api/v1/docs.
