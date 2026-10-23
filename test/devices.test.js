@@ -25,8 +25,11 @@ const unit = {
     filtrationRunning: true,
     waterTemperature: 27.4,
     airTemperature: 24.1,
+    solarTemperature: 36.1,
     ph: 7.2,
+    phRequired: 7.3,
     redox: 680,
+    redoxRequired: 750,
     filterPressure: 0.8,
     filterFlowSpeed: 12.5,
     waterLevel: 45,
@@ -75,6 +78,29 @@ test('ASEKO discovery creates only read-only devices and features', async (t) =>
   assert.equal(flow.category, DEVICE_FEATURE_CATEGORIES.VOLUME_SENSOR);
   assert.equal(flow.type, DEVICE_FEATURE_TYPES.VOLUME_SENSOR.DECIMAL);
   assert.equal(flow.unit, DEVICE_FEATURE_UNITS.CUBIC_METER_PER_HOUR);
+  const numericFeatures = devices[0].features.filter((feature) =>
+    [
+      'Water temperature',
+      'Air temperature',
+      'Solar temperature',
+      'pH',
+      'Target pH',
+      'Redox',
+      'Target redox',
+      'Filter pressure',
+      'Filter flow speed',
+      'Water level (cm)',
+    ].includes(feature.name),
+  );
+  assert.equal(numericFeatures.length, 10);
+  for (const feature of numericFeatures) {
+    assert.ok(Number.isFinite(feature.min), feature.name + ' must have a numeric minimum');
+    assert.ok(Number.isFinite(feature.max), feature.name + ' must have a numeric maximum');
+    assert.ok(feature.min < feature.max, feature.name + ' minimum must be below maximum');
+  }
+  const waterTemperature = numericFeatures.find((feature) => feature.name === 'Water temperature');
+  assert.equal(waterTemperature.min, -10);
+  assert.equal(waterTemperature.max, 60);
   assert.equal(pump.read_only, true);
   assert.equal(typeof asekoPool.onSetValue, 'undefined', 'the integration registers no actuator');
   assert.ok(requests.every((request) => request.options.method === 'GET'));

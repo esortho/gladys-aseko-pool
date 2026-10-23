@@ -17,12 +17,14 @@ const BINARY = (name) => ({
   min: 0,
   max: 1,
 });
-const DECIMAL = (name, category, type = T.SENSOR.DECIMAL, unit) => ({
+const DECIMAL = (name, category, type, unit, min, max) => ({
   name,
   category,
   type,
   valueType: 'number',
   ...(unit ? { unit } : {}),
+  min,
+  max,
 });
 const TEXT = (name) => ({
   name,
@@ -35,12 +37,15 @@ const STATUS_FEATURES = [
   ['filtrationRunning', BINARY('Filtration pump')],
   [
     'waterTemperature',
-    DECIMAL('Water temperature', C.TEMPERATURE_SENSOR, T.SENSOR.DECIMAL, U.CELSIUS),
+    DECIMAL('Water temperature', C.TEMPERATURE_SENSOR, T.SENSOR.DECIMAL, U.CELSIUS, -10, 60),
   ],
-  ['airTemperature', DECIMAL('Air temperature', C.TEMPERATURE_SENSOR, T.SENSOR.DECIMAL, U.CELSIUS)],
+  [
+    'airTemperature',
+    DECIMAL('Air temperature', C.TEMPERATURE_SENSOR, T.SENSOR.DECIMAL, U.CELSIUS, -50, 60),
+  ],
   [
     'solarTemperature',
-    DECIMAL('Solar temperature', C.TEMPERATURE_SENSOR, T.SENSOR.DECIMAL, U.CELSIUS),
+    DECIMAL('Solar temperature', C.TEMPERATURE_SENSOR, T.SENSOR.DECIMAL, U.CELSIUS, -50, 150),
   ],
   ['heatingRunning', BINARY('Heating')],
   ['solarRunning', BINARY('Solar heating')],
@@ -57,16 +62,29 @@ const STATUS_FEATURES = [
       max: 1,
     },
   ],
-  ['ph', DECIMAL('pH', C.PH_SENSOR, T.PH_SENSOR.DECIMAL, U.PH)],
-  ['phRequired', DECIMAL('Target pH', C.PH_SENSOR, T.PH_SENSOR.DECIMAL, U.PH)],
-  ['redox', DECIMAL('Redox', C.ORP_SENSOR, T.ORP_SENSOR.DECIMAL, U.MILLI_VOLT)],
-  ['redoxRequired', DECIMAL('Target redox', C.ORP_SENSOR, T.ORP_SENSOR.DECIMAL, U.MILLI_VOLT)],
-  ['filterPressure', DECIMAL('Filter pressure', C.PRESSURE_SENSOR, T.SENSOR.DECIMAL, U.BAR)],
+  ['ph', DECIMAL('pH', C.PH_SENSOR, T.PH_SENSOR.DECIMAL, U.PH, 0, 14)],
+  ['phRequired', DECIMAL('Target pH', C.PH_SENSOR, T.PH_SENSOR.DECIMAL, U.PH, 0, 14)],
+  ['redox', DECIMAL('Redox', C.ORP_SENSOR, T.ORP_SENSOR.DECIMAL, U.MILLI_VOLT, -2000, 2000)],
+  [
+    'redoxRequired',
+    DECIMAL('Target redox', C.ORP_SENSOR, T.ORP_SENSOR.DECIMAL, U.MILLI_VOLT, -2000, 2000),
+  ],
+  ['filterPressure', DECIMAL('Filter pressure', C.PRESSURE_SENSOR, T.SENSOR.DECIMAL, U.BAR, 0, 10)],
   [
     'filterFlowSpeed',
-    DECIMAL('Filter flow speed', C.VOLUME_SENSOR, T.VOLUME_SENSOR.DECIMAL, U.CUBIC_METER_PER_HOUR),
+    DECIMAL(
+      'Filter flow speed',
+      C.VOLUME_SENSOR,
+      T.VOLUME_SENSOR.DECIMAL,
+      U.CUBIC_METER_PER_HOUR,
+      0,
+      1000,
+    ),
   ],
-  ['waterLevel', DECIMAL('Water level (cm)', C.LEVEL_SENSOR, T.LEVEL_SENSOR.LIQUID_DEPTH, U.CM)],
+  [
+    'waterLevel',
+    DECIMAL('Water level (cm)', C.LEVEL_SENSOR, T.LEVEL_SENSOR.LIQUID_DEPTH, U.CM, 0, 1000),
+  ],
   ['mode', TEXT('Operating mode')],
   ['electrolyzerDirection', TEXT('Electrolyzer direction')],
   ['filtrationSpeed', TEXT('Filtration speed')],
