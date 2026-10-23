@@ -31,6 +31,9 @@ const TEXT = (name) => ({
   category: C.TEXT,
   type: T.TEXT.TEXT,
   valueType: 'text',
+  // The Gladys host requires database bounds for every feature, even text ones.
+  min: 0,
+  max: 1,
 });
 
 const STATUS_FEATURES = [

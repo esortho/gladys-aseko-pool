@@ -33,6 +33,7 @@ const unit = {
     filterPressure: 0.8,
     filterFlowSpeed: 12.5,
     waterLevel: 45,
+    poolFlow: 'BOTTOM',
     heatingRunning: false,
     upcomingFiltrationPeriod: { isNonstop: false, isNext: true, start: '10:00', end: '18:00' },
     clFree: null,
@@ -70,6 +71,14 @@ test('ASEKO discovery creates only read-only devices and features', async (t) =>
   assert.equal(devices[0].poll_frequency, DEVICE_POLL_FREQUENCIES.EVERY_MINUTES);
   assert.ok(devices[0].features.every((feature) => feature.read_only === true));
   assert.ok(devices[0].features.every((feature) => feature.has_feedback === false));
+  for (const feature of devices[0].features) {
+    assert.ok(Number.isFinite(feature.min), feature.name + ' must have a numeric minimum');
+    assert.ok(Number.isFinite(feature.max), feature.name + ' must have a numeric maximum');
+    assert.ok(feature.min < feature.max, feature.name + ' minimum must be below maximum');
+  }
+  const poolFlowMode = devices[0].features.find((feature) => feature.name === 'Pool flow mode');
+  assert.equal(poolFlowMode.min, 0);
+  assert.equal(poolFlowMode.max, 1);
   const pump = devices[0].features.find((feature) => feature.name === 'Filtration pump');
   assert.ok(pump);
   assert.equal(pump.category, DEVICE_FEATURE_CATEGORIES.INPUT);
