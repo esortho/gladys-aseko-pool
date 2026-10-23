@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { getPairedUnit, getPairedUnits } from '../src/aseko-api.js';
 
+const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const config = { api_key: 'not-a-real-test-key' };
 const response = (body, status = 200) => ({
   ok: status >= 200 && status < 300,
@@ -31,7 +33,7 @@ test('getPairedUnits sends the documented auth and client headers and paginates'
   assert.equal(requests[0].options.method, 'GET');
   assert.equal(requests[0].options.headers.Authorization, 'Bearer not-a-real-test-key');
   assert.equal(requests[0].options.headers['X-Client-Name'], 'Gladys ASEKO Pool');
-  assert.equal(requests[0].options.headers['X-Client-Version'], '1.0.0');
+  assert.equal(requests[0].options.headers['X-Client-Version'], packageJson.version);
   assert.equal(new URL(requests[1].url).searchParams.get('page'), '2');
 });
 
